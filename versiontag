@@ -102,17 +102,19 @@ TXT
 # Shows the result of the command
 
 function showSuccess() {
-    echo
-    echo "Tag v$major.$minor.$patch was created in local repository."
-    echo
-    echo "Push it:"
-    echo
-    echo "    git push origin v$major.$minor.$patch"
-    echo
-    echo "Delete tag:"
-    echo
-    echo "    git tag -d v$major.$minor.$patch"
-    echo
+    cat <<TXT
+
+Tag v$major.$minor.$patch was created in local repository.
+
+Push it:
+
+    git push origin v$major.$minor.$patch
+
+Delete tag:
+
+    git tag -d v$major.$minor.$patch
+
+TXT
 }
 
 # Show current version
@@ -145,7 +147,6 @@ function getLastTag() {
 
     last="v$major.$minor.$patch"
 }
-
 
 # Process command options
 
