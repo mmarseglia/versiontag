@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 
-set -e
+set -o errexit
 
 # Initializes flags and other variables
 
 action=''           # the sub-command to execute
 dry=false           # Flag to run with executing commands
 force=false         # Flag to run without asking for confirmation
+verbosity=true      # Flag to show full messages
 versionFile=false   # Flag to generate the .semver file
 last=''             # Will contain the last version tag found
+
+
+function verbose() {
+    local text="$1"
+    if [[ true == "$verbosity" ]]; then
+        printf '%s\n' "$text"
+    fi
+}
 
 ## Runs a command with arguments, taking care of the --dry flag
 function execute {
@@ -18,15 +27,16 @@ function execute {
         return
     fi
 
-    printf '%s\n' "Executing ${cmd[*]} ..."
+    verbose "Executing ${cmd[*]} ..."
 
     "${cmd[@]}" 2>&1
 }
 
 # Asks for confirmation returns yes|no
 function confirm() {
-    read -p "$1 ([y]es or [N]o): "
-    case $(echo $REPLY | tr '[A-Z]' '[a-z]') in
+    local question="$1"
+    read -p -r "$question ([y]es or [N]o): "
+    case $(echo "$REPLY" | tr 'A-Z' 'a-z') in
         y|yes) echo "yes" ;;
         *)     echo "no" ;;
     esac
@@ -131,7 +141,7 @@ function showCurrentVersion() {
 # Get the last tag and breaks into parts
 
 function getLastTag() {
-    lasttag=`git tag | sort -r | grep "^v[0-9]*\.[0-9]*\.[0-9]" | head -1 2> /dev/null` || true
+    lasttag=$(git tag | sort -r | grep "^v[0-9]*\.[0-9]*\.[0-9]" | head -1 2> /dev/null) || true
 
     if [[ -z "$lasttag" ]]; then
         lasttag='v0.0.0'
@@ -139,7 +149,7 @@ function getLastTag() {
 
     lasttag=${lasttag:1}
 
-    parts=(${lasttag//./ })
+    IFS="." read -r -a parts <<< "$lasttag"
 
     major=${parts[0]}
     minor=${parts[1]}
@@ -149,7 +159,6 @@ function getLastTag() {
 }
 
 # Process command options
-
 for ((i = 1; i <= $#; i++ )); do
     case ${!i} in
         "-d"|"--dry")
@@ -163,7 +172,7 @@ for ((i = 1; i <= $#; i++ )); do
             exit 0
             ;;
         "-m"|"--message")
-            let i++
+            ((i++))
             msg="${!i}"
             ;;
         "-s"|"--semver")
