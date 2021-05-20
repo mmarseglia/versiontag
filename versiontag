@@ -123,13 +123,13 @@ function showCurrentVersion() {
         printf '.semver file generated for: %s\n' "$last"
         return
     fi
-    printf 'Current version: %s\n' "$last"
+    printf '%s\n' "$last"
 }
 
 # Get the last tag and breaks into parts
 
 function getLastTag() {
-    lasttag=`git tag | sort -r | grep "^v[0-9]*\.[0-9]*\.[0-9]" | head -1 2> /dev/null` || true
+    lasttag=$(git tag | sort -r | grep "^v[0-9]*\.[0-9]*\.[0-9]" | head -1 2> /dev/null) || true
 
     if [[ -z "$lasttag" ]]; then
         lasttag='v0.0.0'
